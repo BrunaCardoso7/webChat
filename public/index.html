@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            list-style-type: none;
+        }
+        body{
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background-color: rgb(24, 20, 54);
+        }
+        body button{
+            padding: 5px 20px;
+            background-color: rgb(2, 104, 39);
+            color: aliceblue;
+            border: none;
+            border-radius: 14px;
+        }
+        .conteiner-chat{
+            width: 500px;
+            height: 600px;
+            background-color: aliceblue;
+            border-radius: 24px;
+            box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.47);
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            padding: 10px;
+        }
+        .conteiner-chat h2{
+            color: rgb(2, 104, 39);
+            font-weight: 600
+        }
+        .conteiner-chat h2 span{
+            color: rgb(43, 43, 43);
+            font-weight: 300;
+        }
+        .wrapper-msg{
+            width: 80%;
+            height: 80%;
+            background-color: rgb(225, 249, 249);
+            border-radius: 14px;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+        .input-btn{
+            position: relative;
+        }
+        #messages{
+            height: 100%;
+        }
+        #input{
+            position: relative;
+            border-radius: 24px;
+            border: 1px solid gray;
+            height: 30px;
+            width: 390px;
+            padding: 15px;
+            padding-right: 60px;
+        }
+        #input:focus{
+            outline: none;
+        }
+        #btn{
+            position: absolute;
+            padding: 5.8px;
+            right: -1%;
+            bottom: 0%;
+            border: none;
+            background-color: rgb(2, 104, 39);
+            color: aliceblue;
+            border-radius: 0px 24px 24px 0;
+        }
+        .msg{
+            display: flex;
+        }
+        .msg span{
+            font-size: .6rem;
+            font-weight: 600;
+        }
+        .msg span li{
+            font-size: .8rem;
+            font-weight: 300;
+            margin-left: 30px;
+        }
+        #text{
+            font-size: .6rem;
+        }
+    </style>
+</head>
+<body>
+    <button id="logout">sair</button>
+    <div class="conteiner-chat">
+        <h2 id="logo">bears<span>|Chat</span></h2>
+        <div class="wrapper-msg">
+            <ul id="messages">
+                <span id="text"></span>
+                
+            </ul>
+        </div>
+        <form id="form" action="">
+            <div class="input-btn"><input id="input" autocomplete="off" type="text"><button id="btn">enviar</button></div>
+        </form>
+    </div>
+
+
+
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+    <script>        
+        const socket = io()
+      
+        console.log("conexão com socket na URL: "+ socket.io.uri)
+
+        const form = document.getElementById('form')
+        const input = document.getElementById('input')
+        const messages = document.getElementById('messages')
+        const logoBear = document.getElementById('logo')
+        const logout = document.getElementById('logout')
+
+        const urlSearch = new URLSearchParams(window.location.search)
+
+        const username = urlSearch.get("username")
+
+        const room = urlSearch.get("room")  
+
+        function saveLocalStorege (data){
+            const storedMsg = JSON.parse(localStorage.getItem('msgArmazened')) || []
+            storedMsg.push(data)
+            localStorage.setItem('msgArmazened', JSON.stringify(storedMsg))
+        }
+        
+        function loadLocalStorege(){
+            const storedMsg = JSON.parse(localStorage.getItem('msgArmazened')) || []
+            storedMsg.forEach(msg => {
+                addMsgToDom(msg)
+            });
+        }
+        
+        function addMsgToDom(data){
+            const div = document.createElement('div')
+            div.classList.add('msg')
+
+            const message = document.createElement('li')
+            message.textContent = data.msg
+            
+            // if(data.username !== )
+
+            const user = document.createElement('span')
+            user.textContent = data.username+" "
+
+            const hora = document.createElement('span')
+            const date = new Date(data.createdAt) 
+            const hour = date.getHours()
+            const min = date.getMinutes()
+            hora.textContent = ` ${hour}:${min}`
+
+
+            user.appendChild(message)
+            div.appendChild(user)
+            div.appendChild(hora)
+            messages.appendChild(div)
+        }
+        
+        
+        
+        const text = document.getElementById('text')
+        text.innerHTML = `<b>${username}</b> entrou na sala <b>${room}</b>`
+
+
+        console.log(username, room)
+        socket.emit('room',{
+            username,
+            room
+        })
+        
+        form.addEventListener('submit', (e)=>{
+            const msg = input.value
+            e.preventDefault()
+            console.log('Formulário enviado com valor:', msg + room + username);
+
+            const data = {
+                room,
+                msg,
+                username
+            }
+            
+            // emite os dados da mensagem ao servidor assim que o submit for feito
+            socket.emit('chatOn', data)
+
+            saveLocalStorege(data)
+
+            input.value = ''
+            // location.reload()
+        })
+
+        //escuta o evento chatOn no servidor pega os dados de lá e adiciona ao dom
+        socket.on('chatOn', (data) => {
+            console.log('Mensagem recebida:', data);
+            addMsgToDom(data)
+            window.scrollTo(0, document.body.scrollHeight);
+        },response=>{
+            console.log(response)
+        });
+
+
+
+
+        logoBear.addEventListener('click', ()=>{
+            localStorage.clear()
+            location.reload()
+        })
+        
+        logout.addEventListener('click', e=>{
+            window.location.href = "room.html"
+        })
+
+        window.addEventListener('DOMContentLoaded', loadLocalStorege)
+    </script>
+</body>
+</html> 

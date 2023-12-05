@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            list-style-type: none;
+        }
+        body{
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background-color: rgb(24, 20, 54);
+            flex-direction: column;
+        }
+        body h1{
+            color: rgb(208, 217, 225);
+            font-weight: 100;
+        }
+        
+        .conteiner-chat{
+            width: 500px;
+            height: 400px;
+            background-color: aliceblue;
+            border-radius: 24px;
+            box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.47);
+            display: flex;
+            gap: 30px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        .conteiner-chat form{
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            gap: 30px;
+        }
+        .conteiner-chat h2{
+            color: rgb(2, 104, 39);
+            font-weight: 600
+        }
+        .conteiner-chat h2 span{
+            color: rgb(43, 43, 43);
+            font-weight: 300;
+        }
+        #room{
+            padding: 10px 100px;
+            border-radius: 14px;
+            background-color: aliceblue;
+        }
+        #room:focus{
+            outline: none;
+        }
+        #input{
+            position: relative;
+            border-radius: 24px;
+            border: 1px solid gray;
+            height: 30px;
+            width: 390px;
+            padding: 15px;
+        }
+        #input{
+            outline: none;
+        }
+        #entrar{
+            background-color: rgb(2, 104, 39);
+            padding: 10px;
+            border: none;
+            border-radius: 14px;
+            color: aliceblue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Escolha uma sala de bate-papo</h1>
+    <div class="conteiner-chat">
+        <h2 id="logo">bears<span>|Chat</span></h2>
+        <form action="index.html">
+            <select name="room" id="room">
+                <option value="-1"> Rooms</option>
+                <option value="duvida"> Duvidas</option>
+                <option value="programando"> Programando</option>
+            </select>
+            <input id="input" type="text" name="username" placeholder="nome de usuário">
+            <button id="entrar">Entra na sala</button>
+        </form>
+    </div>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+</body>
+</html>
